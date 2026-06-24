@@ -47,15 +47,16 @@ function ThresholdTick({
   );
 }
 
-export function AnomalyGauge({ anomaly }: { anomaly: number }) {
-  const pct   = Math.min(anomaly / GAUGE_MAX, 1);
+export function AnomalyGauge({ anomaly }: { anomaly: number | undefined }) {
+  const safeAnomaly = anomaly ?? 0;
+  const pct   = Math.min(safeAnomaly / GAUGE_MAX, 1);
   const color = pct < 0.29 ? "var(--calm)" : pct < 0.57 ? "var(--warn)" : "var(--alarm)";
 
   const caption =
-    anomaly < 4  ? "within normal range" :
-    anomaly < 8  ? "watching" :
-    anomaly < 14 ? "on a call" :
-                   "escalation";
+    safeAnomaly < 4  ? "within normal range" :
+    safeAnomaly < 8  ? "watching" :
+    safeAnomaly < 14 ? "on a call" :
+                       "escalation";
 
   // arc params: 270° sweep starting at -135° (bottom-left to bottom-right)
   const R   = 70;

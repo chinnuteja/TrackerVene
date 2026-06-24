@@ -18,11 +18,14 @@ from config import (
 )
 
 # ── CORS ───────────────────────────────────────────────────────────────────
-_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    os.getenv("VENE_ALLOWED_ORIGIN", ""),
-]
-_ALLOWED_ORIGINS = [o for o in _ALLOWED_ORIGINS if o]
+# Accept a comma-separated list so multiple Vercel preview URLs work too.
+_raw = os.getenv("VENE_ALLOWED_ORIGIN", "")
+_ALLOWED_ORIGINS = (
+    ["*"]  # wildcard if env var is exactly "*"
+    if _raw.strip() == "*"
+    else [o.strip() for o in _raw.split(",") if o.strip()]
+         + ["http://localhost:3000", "http://localhost:3001"]
+)
 
 app = FastAPI()
 app.add_middleware(
