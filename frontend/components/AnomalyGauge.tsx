@@ -21,8 +21,8 @@ function polarToXY(cx: number, cy: number, r: number, angleDeg: number) {
 }
 
 function ThresholdTick({
-  value, label, cx, cy, R,
-}: { value: number; label: string; cx: number; cy: number; R: number }) {
+  value, label, cx, cy, R, dimmed,
+}: { value: number; label: string; cx: number; cy: number; R: number; dimmed?: boolean }) {
   const deg = angleDeg(value);
   const inner = polarToXY(cx, cy, R - 7, deg);
   const outer = polarToXY(cx, cy, R + 3, deg);
@@ -34,12 +34,12 @@ function ThresholdTick({
       <line
         x1={inner.x} y1={inner.y}
         x2={outer.x} y2={outer.y}
-        stroke={color} strokeWidth={1.5} opacity={0.7}
+        stroke={color} strokeWidth={dimmed ? 1 : 1.5} opacity={dimmed ? 0.25 : 0.7}
       />
       <text
         x={textPt.x} y={textPt.y}
         textAnchor="middle" dominantBaseline="middle"
-        fill={color} fontSize={7} fontFamily="monospace" opacity={0.8}
+        fill={color} fontSize={7} fontFamily="monospace" opacity={dimmed ? 0.3 : 0.8}
       >
         {label}
       </text>
@@ -47,16 +47,43 @@ function ThresholdTick({
   );
 }
 
-export function AnomalyGauge({ anomaly }: { anomaly: number | undefined }) {
+export function AnomalyGauge({
+  anomaly,
+  stability,
+}: {
+  anomaly: number | undefined;
+  stability?: "stable" | "possible_drift" | "regime_shift";
+}) {
   const safeAnomaly = anomaly ?? 0;
   const pct   = Math.min(safeAnomaly / GAUGE_MAX, 1);
-  const color = pct < 0.29 ? "var(--calm)" : pct < 0.57 ? "var(--warn)" : "var(--alarm)";
+
+  // When a regime shift is detected the backend lowers every threshold by 40%
+  // (DRIFT_THRESHOLD_REDUCTION = 0.6). The gauge must reflect that, otherwise a
+  // legitimate call at a low anomaly looks like a bug ("within normal range" + green
+  // while ON A CALL). Scale the effective thresholds the same way.
+  const shifted = stability === "regime_shift";
+  const factor  = shifted ? 0.6 : 1;
+  const tWatch  = 4  * factor;
+  const tCall   = 8  * factor;
+  const tEsc    = 14 * factor;
+
+  const color =
+    safeAnomaly < tWatch ? "var(--calm)" :
+    safeAnomaly < tCall  ? "var(--warn)" :
+                           "var(--alarm)";
 
   const caption =
-    safeAnomaly < 4  ? "within normal range" :
-    safeAnomaly < 8  ? "watching" :
-    safeAnomaly < 14 ? "on a call" :
-                       "escalation";
+    safeAnomaly < tWatch ? "within normal range" :
+    safeAnomaly < tCall  ? (shifted ? "watching · bar lowered" : "watching") :
+    safeAnomaly < tEsc   ? "on a call" :
+                           "escalation";
+
+  // Ticks slide inward when thresholds drop, so the lowered bar is visible.
+  const activeThresholds = [
+    { value: tWatch, label: "W" },
+    { value: tCall,  label: "C" },
+    { value: tEsc,   label: "E" },
+  ];
 
   // arc params: 270° sweep starting at -135° (bottom-left to bottom-right)
   const R   = 70;
@@ -87,8 +114,11 @@ export function AnomalyGauge({ anomaly }: { anomaly: number | undefined }) {
           style={{ filter: `drop-shadow(0 0 10px ${color})` }}
         />
 
-        {/* threshold ticks */}
-        {THRESHOLDS.map(t => (
+        {/* threshold ticks — slide inward on regime shift */}
+        {shifted && THRESHOLDS.map(t => (
+          <ThresholdTick key={`base-${t.value}`} value={t.value} label="" cx={cx} cy={cy} R={R} dimmed />
+        ))}
+        {activeThresholds.map(t => (
           <ThresholdTick key={t.value} value={t.value} label={t.label} cx={cx} cy={cy} R={R} />
         ))}
       </svg>
@@ -96,12 +126,17 @@ export function AnomalyGauge({ anomaly }: { anomaly: number | undefined }) {
       {/* centre label */}
       <div className="absolute text-center">
         <div className="text-4xl font-mono" style={{ color }}>
-          {anomaly.toFixed(1)}
+          {safeAnomaly.toFixed(1)}
         </div>
         <div className="text-[10px] text-[var(--muted)] tracking-wide font-mono">ANOMALY</div>
         <div className="text-[9px] font-mono mt-0.5" style={{ color }}>
           {caption}
         </div>
+        {shifted && (
+          <div className="text-[8px] font-mono mt-0.5" style={{ color: "var(--alarm)" }}>
+            ▼ regime shift · thresholds −40%
+          </div>
+        )}
       </div>
     </div>
   );

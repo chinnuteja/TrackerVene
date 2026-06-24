@@ -142,7 +142,7 @@ export default function Page() {
               className="rounded-2xl border p-4 flex-shrink-0"
               style={{ borderColor: "var(--border)", background: "var(--panel)" }}
             >
-              <AnomalyGauge anomaly={anomaly} />
+              <AnomalyGauge anomaly={anomaly} stability={changepoint.stability} />
               <AnomalySparkline data={series} />
             </div>
 
