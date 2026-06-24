@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { ROOM_POS, EDGES } from "@/lib/floorplan";
 
 export function LivingFloorplan({ currentRoom, anomaly }:
-  { currentRoom: string | null; anomaly: number }) {
+  { currentRoom: string | null; anomaly: number | undefined }) {
   const pos = currentRoom ? ROOM_POS[currentRoom] : { x: 200, y: 200 };
-  const heat = Math.min(anomaly / 14, 1); // 0..1 -> green..red
+  const heat = Math.min((anomaly ?? 0) / 14, 1); // 0..1 -> green..red
   const pulseColor = `hsl(${(1 - heat) * 150}, 80%, 55%)`;
 
   return (

@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { CallPhase } from "@/hooks/useRoutineFeed";
 
 type Props = {
-  anomaly:    number;
+  anomaly:    number | undefined;
   callPhase:  CallPhase;
-  stability:  "stable" | "possible_drift" | "regime_shift";
+  stability:  "stable" | "possible_drift" | "regime_shift" | undefined;
   name:       string;
   lastStandDown?: boolean;
 };
@@ -64,7 +64,7 @@ function getNarration(
 }
 
 export function StatusNarration({ anomaly, callPhase, stability, name, lastStandDown }: Props) {
-  const { text, color, key } = getNarration(anomaly, callPhase, stability, name, lastStandDown);
+  const { text, color, key } = getNarration(anomaly ?? 0, callPhase, stability ?? "stable", name, lastStandDown);
 
   return (
     <div className="flex items-center gap-2 px-1 py-1">
