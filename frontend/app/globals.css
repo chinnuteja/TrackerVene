@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", var(--font-sans);
+  --font-mono: "Roboto Mono", var(--font-mono);
+}
+
+:root {
+  --bg:        #0A0A0B;   /* near-black canvas */
+  --panel:     #111113;   /* raised surface */
+  --border:    #1F1F23;   /* hairline */
+  --text:      #EDEDEF;
+  --muted:     #8A8A92;
+  --accent:    #4F8CFF;   /* one electric blue, used sparingly */
+  --calm:      #2DD4A7;   /* green — safe / stable */
+  --warn:      #F5A623;   /* amber — probing / drift */
+  --alarm:     #FF4D4D;   /* red — escalation / regime shift */
+  --glow:      0 0 24px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-feature-settings: "ss01","cv01";
+}

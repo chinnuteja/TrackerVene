@@ -1,0 +1,21 @@
+{
+  "name": "Mary",
+  "age": 85,
+  "baseline_summary": "Wakes ~6:30, makes coffee in the kitchen by 7:00, spends afternoons in the living room, asleep by 22:00.",
+  "personal_details": [
+    "daughter Sarah calls every Sunday morning",
+    "hip replacement surgery in 2024, occasional pain flare-ups",
+    "treated for a UTI in March 2026",
+    "loves her morning radio — BBC Radio 4",
+    "takes blood pressure medication with breakfast"
+  ],
+  "prior_incidents": [
+    {
+      "ts": "2026-03-14T03:47:00.000000",
+      "kind": "uti",
+      "summary": "Repeated nocturnal bathroom trips — 5 visits between 01:00 and 04:30",
+      "action": "soft_checkin",
+      "resolution": "worrying — escalated to caregiver"
+    }
+  ]
+}

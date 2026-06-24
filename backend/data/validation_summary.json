@@ -1,0 +1,6 @@
+{
+  "detection_rate": "2/6",
+  "false_alarms_per_day": 0.0,
+  "median_latency_min": 219.5,
+  "headline": "2/6 scenarios detected | 0 false-alarms/day on baseline | median latency 219.5 min"
+}

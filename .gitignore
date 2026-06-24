@@ -1,0 +1,58 @@
+# Large data files (too big for GitHub)
+casas_data.zip
+test.zip
+ArWISE/
+backend/data/casas_clean.jsonl
+backend/data/casas_raw.txt
+
+# Internal planning / explainer docs — kept local, not for the public repo
+/01_dataset_and_ingestion.md
+/02_mathematical_brain_and_agent.md
+/03_react_frontend_dashboard.md
+/DEMO_WALKTHROUGH.md
+/IMPL_01_conversational_brain.md
+/IMPL_02_frontend_and_demo_control.md
+/IMPL_03_vitals_validation_deploy.md
+/LOOM.md
+/PRODUCT_DEEP_DIVE.md
+/TECHNICAL.md
+/UNDERSTAND.md
+frontend/AGENTS.md
+frontend/CLAUDE.md
+frontend/README.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
