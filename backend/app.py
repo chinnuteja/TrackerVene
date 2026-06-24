@@ -36,7 +36,7 @@ app.add_middleware(
 DATA_DIR = pathlib.Path(__file__).parent / "data"
 
 SCENARIO_FILES = {
-    "calm":                DATA_DIR / "casas_clean.jsonl",
+    "calm":                DATA_DIR / "casas_calm.jsonl",
     "uti":                 DATA_DIR / "casas_uti.jsonl",
     "wandering":           DATA_DIR / "casas_wandering.jsonl",
     "depressive":          DATA_DIR / "casas_depressive.jsonl",

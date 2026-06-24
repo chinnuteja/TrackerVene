@@ -16,4 +16,5 @@ RUN python brain/routine_model.py || true
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form so ${PORT} from the host (Render/Railway) is honored; falls back to 8000 locally
+CMD uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}

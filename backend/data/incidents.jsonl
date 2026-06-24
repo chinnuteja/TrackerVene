@@ -1,0 +1,2 @@
+{"ts": "2026-06-24T18:36:16.735611", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "soft_checkin", "resolution": "worrying \u2014 escalated"}
+{"ts": "2026-06-24T18:36:20.258911", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
