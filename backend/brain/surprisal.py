@@ -1,6 +1,7 @@
 import json, numpy as np
 from datetime import datetime
 from scipy.stats import lognorm
+from config import ABSENCE_PERCENTILE, ABSENCE_FLOOR_SECONDS, ABSENCE_CEIL_SECONDS
 
 N_BUCKETS = 8
 DECAY = 0.95          # anomaly score memory; higher = longer memory
@@ -86,3 +87,13 @@ class Scorer:
         return {"surprisal": round(float(s), 3),
                 "anomaly": round(float(self.anomaly), 3),
                 "reason": reason, "bucket": b}
+
+    def expected_silence(self, room: str, bucket: int) -> float:
+        """97th-pct dwell time for this room+bucket — how long silence is normal."""
+        key = (str(bucket), room)
+        dist = self.dwell_dists.get(key)
+        if dist is not None:
+            raw = dist.ppf(ABSENCE_PERCENTILE)
+        else:
+            raw = self.dwell_means.get(key, 300.0) * 2.5
+        return float(np.clip(raw, ABSENCE_FLOOR_SECONDS, ABSENCE_CEIL_SECONDS))

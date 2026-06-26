@@ -15,6 +15,7 @@ import { CaregiverHistory }  from "@/components/CaregiverHistory";
 import { TimelineRibbon }    from "@/components/TimelineRibbon";
 import { IntroOverlay }      from "@/components/IntroOverlay";
 import { StatusNarration }  from "@/components/StatusNarration";
+import { AbsenceAlert }     from "@/components/AbsenceAlert";
 
 type ValidationStats = { detection_rate: string; false_alarms_per_day: number | null; median_latency_min: number | null };
 
@@ -32,6 +33,7 @@ export default function Page() {
     currentRoom, anomaly, series, decisions, changepoint, isDone,
     currentProbe, lastResolution, callPhase,
     memory, incidents,
+    location, currentAbsence,
     scenario, setScenario,
     mode, setMode,
     answer,
@@ -110,6 +112,7 @@ export default function Page() {
             stability={changepoint.stability}
             name={memory?.name ?? "the resident"}
             lastStandDown={lastResolution?.stand_down}
+            hasAbsence={!!currentAbsence}
           />
         </div>
 
@@ -124,13 +127,20 @@ export default function Page() {
             <div className="px-5 pt-4 pb-2 flex-shrink-0">
               <h2 className="text-sm font-semibold">Living Floorplan</h2>
               <p className="text-xs text-[var(--muted)]">
-                {currentRoom
-                  ? `Mary is in the ${currentRoom}`
-                  : "Waiting for data…"}
+                {currentAbsence
+                  ? `Left ${currentAbsence.from_room} — location unknown`
+                  : currentRoom
+                    ? `Mary is in the ${currentRoom}`
+                    : "Waiting for data…"}
               </p>
             </div>
             <div className="flex-1 min-h-0 p-2">
-              <LivingFloorplan currentRoom={currentRoom} anomaly={anomaly} />
+              <LivingFloorplan
+                currentRoom={currentRoom}
+                anomaly={anomaly}
+                location={location}
+                currentAbsence={currentAbsence}
+              />
             </div>
           </div>
 
@@ -149,6 +159,11 @@ export default function Page() {
             {/* BOCD stability */}
             <div className="flex-shrink-0">
               <RoutineStability state={changepoint} />
+            </div>
+
+            {/* absence alert — appears when absence detected */}
+            <div className="flex-shrink-0">
+              <AbsenceAlert absence={currentAbsence} />
             </div>
 
             {/* probe card — appears only when probe is active */}

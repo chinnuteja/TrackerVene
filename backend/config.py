@@ -24,6 +24,11 @@ LLM_TIMEOUT         = 10.0    # seconds before Azure OpenAI call falls back
 PROBE_AUTO_DELAY    = 2.5     # kept for backward-compat; no longer the primary timer
 PROBE_INTERACTIVE_TIMEOUT = 30.0  # seconds to wait for an interactive answer
 
+# ── Absence / expected-silence model ─────────────────────────────────────────
+ABSENCE_PERCENTILE     = 0.97   # how "patient" we are: 97th pct of dwell dist
+ABSENCE_FLOOR_SECONDS  = 90     # never fire faster than this
+ABSENCE_CEIL_SECONDS   = 6 * 3600  # never wait longer than 6h (overnight sleep)
+
 # ── Call pacing ────────────────────────────────────────────────────────────────
 PROBE_COMPOSE_DELAY    = 1.2   # composing → ringing
 PROBE_RING_DELAY       = 1.2   # ringing → probe (script starts typing)

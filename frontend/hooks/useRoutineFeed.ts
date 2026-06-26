@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-export type Scenario = "calm" | "uti" | "wandering" | "depressive"
+export type Scenario = "calm" | "uti" | "wandering" | "depressive" | "hallway_fall"
                      | "uti_multiday" | "wandering_multiday" | "depressive_multiday";
 export type Mode      = "auto" | "interactive";
 export type CallPhase = "idle" | "composing" | "ringing" | "calling" | "listening" | "interpreting" | "resolved";
@@ -58,6 +58,21 @@ export type Incident = {
   resolution: string;
 };
 
+export type LocationState = {
+  best:       string;
+  confidence: number;
+  belief:     Record<string, number>;
+};
+
+export type AbsenceEvent = {
+  from_room:       string;
+  last_seen_ts:    string;
+  silent_for:      number;
+  expected_within: number;
+  within_room:     boolean;
+  severity:        "high";
+};
+
 export type FeedMsg = {
   type:        string;
   event?:      { room: string; ts: string; value: string };
@@ -106,6 +121,8 @@ export function useRoutineFeed() {
   const [incidents,      setIncidents]      = useState<Incident[]>([]);
   const [isDone,         setIsDone]         = useState(false);
   const [callPhase,      setCallPhase]      = useState<CallPhase>("idle");
+  const [location,       setLocation]       = useState<LocationState | null>(null);
+  const [currentAbsence, setCurrentAbsence] = useState<AbsenceEvent | null>(null);
 
   // reset all feed state when scenario/mode changes
   const resetFeed = useCallback(() => {
@@ -117,6 +134,8 @@ export function useRoutineFeed() {
     setLastResolution(null);
     setCallPhase("idle");
     setIsDone(false);
+    setLocation(null);
+    setCurrentAbsence(null);
     // keep memory + incidents — they're persistent across runs
   }, []);
 
@@ -143,6 +162,7 @@ export function useRoutineFeed() {
         const sc  = m.score  as { surprisal: number; anomaly: number; reason: string } | undefined;
         const cp  = m.changepoint as ChangepointState | undefined;
         const dec = m.decision as Decision | undefined;
+        const loc = m.location as LocationState | undefined;
         if (ev && sc) {
           setCurrentRoom(ev.room);
           setAnomaly(sc.anomaly);
@@ -155,8 +175,15 @@ export function useRoutineFeed() {
         if (dec && dec.action !== "observe") {
           setDecisions(d => [dec, ...d].slice(0, 8));
         }
+        if (loc) setLocation(loc);
+        // clear absence once a new event arrives
+        setCurrentAbsence(null);
         break;
       }
+
+      case "absence":
+        setCurrentAbsence(m as unknown as AbsenceEvent);
+        break;
 
       case "call":
         setCallPhase(m.phase as CallPhase);
@@ -222,6 +249,8 @@ export function useRoutineFeed() {
     currentProbe, lastResolution, callPhase,
     // memory
     memory, incidents,
+    // location + absence
+    location, currentAbsence,
     // control
     scenario, setScenario, mode, setMode,
     answer,

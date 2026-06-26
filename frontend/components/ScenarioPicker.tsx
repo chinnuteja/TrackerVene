@@ -2,10 +2,11 @@
 import { motion } from "framer-motion";
 import type { Scenario, Mode } from "@/hooks/useRoutineFeed";
 
-const SCENARIOS: { id: Scenario; label: string; desc: string; multi?: boolean }[] = [
+const SCENARIOS: { id: Scenario; label: string; desc: string; multi?: boolean; hero?: boolean }[] = [
   { id: "uti",                label: "UTI",          desc: "Nocturnal bathroom trips" },
   { id: "wandering",          label: "Wandering",    desc: "3am front-door egress" },
   { id: "depressive",         label: "Low mood",     desc: "No morning kitchen routine" },
+  { id: "hallway_fall",       label: "Hallway fall", desc: "Fall between rooms — no sensor needed", hero: true },
   { id: "uti_multiday",       label: "UTI ×3d",      desc: "3-day ramping UTI arc",     multi: true },
   { id: "wandering_multiday", label: "Wander ×3d",   desc: "3-day wandering arc",       multi: true },
   { id: "depressive_multiday",label: "Low ×3d",      desc: "3-day low mood arc",        multi: true },
@@ -29,8 +30,9 @@ export function ScenarioPicker({ scenario, setScenario, mode, setMode, disabled 
     <div className="flex items-center gap-3">
       {/* Scenario chips — single-day */}
       <div className="flex gap-1.5">
-        {SCENARIOS.filter(s => !s.multi).map(({ id, label, desc }) => {
-          const active = scenario === id;
+        {SCENARIOS.filter(s => !s.multi).map(({ id, label, desc, hero }) => {
+          const active    = scenario === id;
+          const chipColor = hero ? "var(--alarm)" : "var(--warn)";
           return (
             <motion.button
               key={id}
@@ -42,9 +44,9 @@ export function ScenarioPicker({ scenario, setScenario, mode, setMode, disabled 
               className="px-2.5 py-1 rounded-md border text-[11px] font-semibold
                          tracking-wide cursor-pointer transition-all"
               style={{
-                borderColor: active ? "var(--warn)" : "var(--border)",
-                color:       active ? "var(--warn)" : "var(--muted)",
-                background:  active ? "color-mix(in srgb, var(--warn) 10%, transparent)" : "transparent",
+                borderColor: active ? chipColor : "var(--border)",
+                color:       active ? chipColor : "var(--muted)",
+                background:  active ? `color-mix(in srgb, ${chipColor} 10%, transparent)` : "transparent",
                 opacity:     disabled ? 0.35 : 1,
                 cursor:      disabled ? "not-allowed" : "pointer",
               }}

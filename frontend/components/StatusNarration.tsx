@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { CallPhase } from "@/hooks/useRoutineFeed";
 
 type Props = {
-  anomaly:    number | undefined;
-  callPhase:  CallPhase;
-  stability:  "stable" | "possible_drift" | "regime_shift" | undefined;
-  name:       string;
+  anomaly:        number | undefined;
+  callPhase:      CallPhase;
+  stability:      "stable" | "possible_drift" | "regime_shift" | undefined;
+  name:           string;
   lastStandDown?: boolean;
+  hasAbsence?:    boolean;
 };
 
 type NarrationState = { text: string; color: string; key: string };
@@ -18,12 +19,20 @@ function getNarration(
   stability: string,
   name: string,
   lastStandDown?: boolean,
+  hasAbsence?: boolean,
 ): NarrationState {
   const activeCallPhases: CallPhase[] = ["composing", "ringing", "calling", "listening", "interpreting"];
 
+  if (hasAbsence && !activeCallPhases.includes(callPhase) && callPhase !== "resolved") {
+    return {
+      text:  `No activity where there should be — checking on ${name}.`,
+      color: "var(--alarm)",
+      key:   "absence",
+    };
+  }
   if (activeCallPhases.includes(callPhase)) {
     return {
-      text:  `Vene is on a call with ${name}.`,
+      text:  `On a call with ${name}.`,
       color: "var(--accent)",
       key:   "on-call",
     };
@@ -31,7 +40,7 @@ function getNarration(
   if (callPhase === "resolved") {
     if (lastStandDown) {
       return {
-        text:  `${name} is fine — Vene stood down.`,
+        text:  `${name} is fine — stood down.`,
         color: "var(--calm)",
         key:   "stood-down",
       };
@@ -44,7 +53,7 @@ function getNarration(
   }
   if (stability === "regime_shift" || anomaly >= 8) {
     return {
-      text:  `Routine has shifted — Vene is paying close attention.`,
+      text:  "Routine has shifted — paying close attention.",
       color: "var(--alarm)",
       key:   "regime-shift",
     };
@@ -57,14 +66,16 @@ function getNarration(
     };
   }
   return {
-    text:  "All calm — Vene is observing quietly.",
+    text:  "All calm — observing quietly.",
     color: "var(--calm)",
     key:   "calm",
   };
 }
 
-export function StatusNarration({ anomaly, callPhase, stability, name, lastStandDown }: Props) {
-  const { text, color, key } = getNarration(anomaly ?? 0, callPhase, stability ?? "stable", name, lastStandDown);
+export function StatusNarration({ anomaly, callPhase, stability, name, lastStandDown, hasAbsence }: Props) {
+  const { text, color, key } = getNarration(
+    anomaly ?? 0, callPhase, stability ?? "stable", name, lastStandDown, hasAbsence
+  );
 
   return (
     <div className="flex items-center gap-2 px-1 py-1">

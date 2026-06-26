@@ -56,6 +56,35 @@ def inject_3am_egress(events):
           "activity":"Unlabeled","_injected":True}
     return sorted(events + [ev], key=lambda x: x["epoch"])
 
+def inject_hallway_gap(events, gap_minutes: int = 15):
+    """
+    Hallway-fall: trim to the densest 3-hour activity window (eliminating
+    sparse daytime gaps that would cause false absence alarms), then carve a
+    gap after the first Bedroom event within that window.
+    """
+    from collections import Counter
+
+    # Find the 1-hour peak, then take ±1 hour around it for context
+    hour_counts = Counter(datetime.fromisoformat(e["ts"]).hour for e in events)
+    peak_hour   = max(hour_counts, key=hour_counts.get)
+    lo, hi      = max(0, peak_hour - 1), min(23, peak_hour + 2)
+
+    window = [e for e in events
+              if lo <= datetime.fromisoformat(e["ts"]).hour <= hi]
+    if not window:
+        window = events[:]
+
+    # Find first Bedroom event in the dense window; fall back to any room
+    departure  = next((e for e in window if e["room"] == "Bedroom"), window[0])
+    dep_epoch  = departure["epoch"]
+    gap_sec    = gap_minutes * 60
+
+    # Keep departure, remove everything in (dep_epoch, dep_epoch+gap_sec)
+    filtered = [e for e in window
+                if not (dep_epoch < e["epoch"] < dep_epoch + gap_sec)]
+    return sorted(filtered, key=lambda x: x["epoch"])
+
+
 def build_multiday(profile: str, n_days: int = 3, ramp: bool = True,
                    baseline_path: str = "data/casas_clean.jsonl") -> list:
     """
@@ -123,5 +152,8 @@ if __name__ == "__main__":
     _write(build_multiday("uti"),        "data/casas_uti_multiday.jsonl")
     _write(build_multiday("wandering"),  "data/casas_wandering_multiday.jsonl")
     _write(build_multiday("depressive"), "data/casas_depressive_multiday.jsonl")
+
+    # Hallway fall: 15-min gap after midday Bedroom departure
+    _write(inject_hallway_gap(day, gap_minutes=15), "data/casas_hallway_fall.jsonl")
 
     print("All scenario files built.")

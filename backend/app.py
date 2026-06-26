@@ -3,9 +3,10 @@ from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from brain.surprisal   import Scorer
+from brain.surprisal   import Scorer, bucket_of
 from brain.changepoint import BayesianChangepoint
 from brain.agent       import Agent
+from brain.location    import LocationBelief
 from brain.memory      import load_memory, add_incident, memory_brief
 from brain.conversation import interpret_reply
 
@@ -43,6 +44,7 @@ SCENARIO_FILES = {
     "uti":                 DATA_DIR / "casas_uti.jsonl",
     "wandering":           DATA_DIR / "casas_wandering.jsonl",
     "depressive":          DATA_DIR / "casas_depressive.jsonl",
+    "hallway_fall":        DATA_DIR / "casas_hallway_fall.jsonl",
     "uti_multiday":        DATA_DIR / "casas_uti_multiday.jsonl",
     "wandering_multiday":  DATA_DIR / "casas_wandering_multiday.jsonl",
     "depressive_multiday": DATA_DIR / "casas_depressive_multiday.jsonl",
@@ -54,6 +56,7 @@ SCENARIO_REPLIES = {
     "uti":             "I keep needing the bathroom and my side is hurting a bit.",
     "wandering":       "",                                        # no answer
     "depressive":      "I don't know… I just don't feel like doing anything today.",
+    "hallway_fall":    "",                                        # no answer → escalate
     "uti_multiday":    "I keep needing the bathroom and my side is hurting a bit.",
     "wandering_multiday":  "",
     "depressive_multiday": "I don't know… I just don't feel like doing anything today.",
@@ -168,29 +171,74 @@ async def feed(ws: WebSocket):
 
     # ── main replay loop ───────────────────────────────────────────────────
     speed = SPEED_MULTIDAY if scenario.endswith("_multiday") else SPEED
+    location_belief   = LocationBelief(scorer.rooms, scorer.P)
+
     prev              = events[0]["epoch"]
     probe_active      = False   # guard: one probe at a time
     probe_cooldown    = 0       # events remaining before next probe is allowed
     escalated         = False   # once escalated, no more probes this session
     MAX_PROBES        = 3       # cap for the demo arc
     probes_fired      = 0
+    absence_fired     = False   # guard: one absence episode at a time
+    prev_ts_iso       = None    # iso timestamp of last processed event
 
     try:
         for e in events:
-            delay = min((e["epoch"] - prev) / speed, MAX_GAP)
-            prev  = e["epoch"]
+            gap   = e["epoch"] - prev
+            delay = min(gap / speed, MAX_GAP)
+
+            # ── absence watchdog: gap exceeded expected-silence budget? ──────
+            silence_budget = None
+            if scorer.prev_room is not None and prev_ts_iso is not None:
+                b_prev         = bucket_of(prev_ts_iso)
+                silence_budget = scorer.expected_silence(scorer.prev_room, b_prev)
+                # Only fire when crossing rooms: same-room re-fires are liveness, not gaps
+                if (not absence_fired and not escalated and gap > silence_budget
+                        and e["room"] != scorer.prev_room):
+                    absence_fired = True
+                    within_room   = (e["room"] == scorer.prev_room)
+                    await ws.send_json({
+                        "type":            "absence",
+                        "from_room":       scorer.prev_room,
+                        "last_seen_ts":    prev_ts_iso,
+                        "silent_for":      round(gap),
+                        "expected_within": round(silence_budget),
+                        "within_room":     within_room,
+                        "severity":        "high",
+                    })
+                    # boost anomaly so the next decision fires a check-in
+                    scorer.anomaly = max(scorer.anomaly, 10.0)
+
+            prev = e["epoch"]
             await asyncio.sleep(max(delay, 0))
+
+            # ── location belief: diffuse then observe ────────────────────────
+            b_now = bucket_of(e["ts"])
+            location_belief.predict(b_now)
+            location_belief.observe(e["room"])
+            loc_state = location_belief.state()
+
+            liveness = (
+                "quiet" if silence_budget is not None and gap > silence_budget * 0.5
+                else "active"
+            )
+
+            # reset absence guard once a new event arrives
+            absence_fired = False
+            prev_ts_iso   = e["ts"]
 
             score    = scorer.score(e)
             cp_state = cpd.update(score["surprisal"])
             decision = agent.decide(score, cp_state, e)
 
             await ws.send_json({
-                "type":       "event",
-                "event":      e,
-                "score":      score,
-                "decision":   decision,
+                "type":        "event",
+                "event":       e,
+                "score":       score,
+                "decision":    decision,
                 "changepoint": cp_state,
+                "location":    loc_state,
+                "liveness":    liveness,
             })
 
             # ── tick down cooldown counter ────────────────────────────────
