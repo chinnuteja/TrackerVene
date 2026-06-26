@@ -176,8 +176,6 @@ export function useRoutineFeed() {
           setDecisions(d => [dec, ...d].slice(0, 8));
         }
         if (loc) setLocation(loc);
-        // clear absence once a new event arrives
-        setCurrentAbsence(null);
         break;
       }
 
@@ -202,6 +200,7 @@ export function useRoutineFeed() {
       case "resolution":
         setLastResolution(m as unknown as Resolution);
         setCallPhase("resolved");
+        setCurrentAbsence(null);
         break;
 
       case "memory":
