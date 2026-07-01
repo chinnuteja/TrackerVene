@@ -16,6 +16,13 @@ import { TimelineRibbon }    from "@/components/TimelineRibbon";
 import { IntroOverlay }      from "@/components/IntroOverlay";
 import { StatusNarration }  from "@/components/StatusNarration";
 import { AbsenceAlert }     from "@/components/AbsenceAlert";
+import { BlindAlert }       from "@/components/BlindAlert";
+import { IPHONE_POS, IPHONE_EDGES } from "@/lib/floorplan";
+import { LiveRead }        from "@/components/LiveRead";
+import { ColdStartNote }   from "@/components/ColdStartNote";
+import { WatchingNote }    from "@/components/WatchingNote";
+import { CarryPanel }       from "@/components/CarryPanel";
+import { PlacesPanel }      from "@/components/PlacesPanel";
 
 type ValidationStats = { detection_rate: string; false_alarms_per_day: number | null; median_latency_min: number | null };
 
@@ -33,18 +40,19 @@ export default function Page() {
     currentRoom, anomaly, series, decisions, changepoint, isDone,
     currentProbe, lastResolution, callPhase,
     memory, incidents,
-    location, currentAbsence,
+    location, currentAbsence, blind, live,
     scenario, setScenario,
     mode, setMode,
     answer,
   } = useRoutineFeed();
 
-  const isCalm = scenario === "calm";
+  const isCalm   = scenario === "calm";
+  const isIphone = scenario === "iphone_realday";
 
   return (
     <>
       {/* ── Intro overlay ───────────────────────────────────────────── */}
-      {showIntro && <IntroOverlay onDismiss={() => setShowIntro(false)} />}
+      {showIntro && <IntroOverlay onDismiss={() => { setShowIntro(false); setScenario("iphone_realday"); }} />}
 
       {/* ── Main layout ─────────────────────────────────────────────── */}
       <main
@@ -65,8 +73,8 @@ export default function Page() {
               ◉
             </div>
             <div>
-              <span className="text-sm font-semibold">Mary, 85</span>
-              <span className="text-[var(--muted)] text-xs ml-2">· Home</span>
+              <span className="text-sm font-semibold">{isIphone ? "My apartment" : "Mary, 85"}</span>
+              <span className="text-[var(--muted)] text-xs ml-2">{isIphone ? "· iPhone" : "· Home"}</span>
             </div>
           </div>
 
@@ -125,13 +133,23 @@ export default function Page() {
             style={{ borderColor: "var(--border)", background: "var(--panel)" }}
           >
             <div className="px-5 pt-4 pb-2 flex-shrink-0">
-              <h2 className="text-sm font-semibold">Living Floorplan</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold">Living Floorplan</h2>
+                {isIphone && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border tracking-wide"
+                        style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
+                    iPhone · recorded
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-[var(--muted)]">
-                {currentAbsence
-                  ? `Left ${currentAbsence.from_room} — location unknown`
-                  : currentRoom
-                    ? `Mary is in the ${currentRoom}`
-                    : "Waiting for data…"}
+                {blind
+                  ? "Signal lost — can’t see her"
+                  : currentAbsence
+                    ? `Left ${currentAbsence.from_room} — location unknown`
+                    : currentRoom
+                      ? (isIphone ? `In the ${currentRoom}` : `Mary is in the ${currentRoom}`)
+                      : "Waiting for data…"}
               </p>
             </div>
             <div className="flex-1 min-h-0 p-2">
@@ -140,12 +158,29 @@ export default function Page() {
                 anomaly={anomaly}
                 location={location}
                 currentAbsence={currentAbsence}
+                blind={!!blind}
+                layout={isIphone ? { pos: IPHONE_POS, edges: IPHONE_EDGES } : undefined}
               />
             </div>
           </div>
 
           {/* ── RIGHT: instruments ────────────────────────────────── */}
           <div className="flex flex-col gap-3 overflow-y-auto min-h-0">
+
+            {/* iPhone demo: orientation → plain-language live read → data note */}
+            {isIphone && (
+              <>
+                <WatchingNote />
+                <LiveRead
+                  live={live}
+                  anomaly={anomaly}
+                  callPhase={callPhase}
+                  currentAbsence={currentAbsence}
+                  blind={blind}
+                />
+                <ColdStartNote />
+              </>
+            )}
 
             {/* gauge + sparkline */}
             <div
@@ -161,9 +196,22 @@ export default function Page() {
               <RoutineStability state={changepoint} />
             </div>
 
+            {/* iPhone demo panels — carry signal + discovered places */}
+            {isIphone && (
+              <>
+                <div className="flex-shrink-0"><CarryPanel /></div>
+                <div className="flex-shrink-0"><PlacesPanel /></div>
+              </>
+            )}
+
             {/* absence alert — appears when absence detected */}
             <div className="flex-shrink-0">
               <AbsenceAlert absence={currentAbsence} />
+            </div>
+
+            {/* blind / observability alert — phone went dark */}
+            <div className="flex-shrink-0">
+              <BlindAlert blind={blind} />
             </div>
 
             {/* probe card — appears only when probe is active */}
@@ -186,17 +234,24 @@ export default function Page() {
               <ReasoningFeed decisions={decisions} />
             </div>
 
-            {/* memory panel */}
-            <div className="flex-shrink-0">
-              <MemoryPanel
-                memory={memory}
-                latestProbe={currentProbe?.script}
-              />
-            </div>
+            {/* memory panel — hidden for the iPhone home (day one, nothing learned yet) */}
+            {!isIphone && (
+              <div className="flex-shrink-0">
+                <MemoryPanel
+                  memory={memory}
+                  latestProbe={currentProbe?.script}
+                />
+              </div>
+            )}
 
             {/* caregiver history */}
             <div className="flex-shrink-0">
-              <CaregiverHistory incidents={incidents} />
+              <CaregiverHistory
+                incidents={incidents}
+                subtitle={isIphone
+                  ? "What the family would see from this session."
+                  : undefined}
+              />
             </div>
           </div>
         </div>

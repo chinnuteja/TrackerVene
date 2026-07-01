@@ -4,19 +4,34 @@ test.zip
 ArWISE/
 backend/data/casas_clean.jsonl
 backend/data/casas_raw.txt
+2026-06-29_*.json
 
 # Internal planning / explainer docs — kept local, not for the public repo
 /01_dataset_and_ingestion.md
-/02_mathematical_brain_and_agent.md
+/02_mathematical_brain_and_other.md
+/02_iphone_localization_architecture.md
+/03_coldstart_physics_localization.md
 /03_react_frontend_dashboard.md
+/04_living_map_thesis.md
+/06_DEMO_MASTERPLAN.md
+/07_CONSTRAINTS_AND_MITIGATIONS.md
+/08_CORE_BRAIN_HONEST_AUDIT.md
+/09_WHAT_WE_BUILT_iphone_demo.md
+/00_VENE_iPhone_MASTERPLAN.md
+/ARITRA_CALL_PREP.md
 /DEMO_WALKTHROUGH.md
+/FOLLOWUP_LOOM_SCRIPT.md
 /IMPL_01_conversational_brain.md
 /IMPL_02_frontend_and_demo_control.md
 /IMPL_03_vitals_validation_deploy.md
 /LOOM.md
 /PRODUCT_DEEP_DIVE.md
 /TECHNICAL.md
+/TECHNICAL_DEEP_DIVE.md
 /UNDERSTAND.md
+/VENE_PRODUCT_REALITY.md
+/"Passive iOS Eldercare Tracking.md"
+/"Single-Receiver Whole-Home Device-Free Localization via Walkthrough Calibration.md"
 frontend/AGENTS.md
 frontend/CLAUDE.md
 frontend/README.md

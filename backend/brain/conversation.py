@@ -34,16 +34,19 @@ def _llm_available() -> bool:
 
 # ─────────────────────────── fallback scripted lines ────────────────────────
 
-def _fallback_script(reason: str, hour: int, stability: str) -> str:
+def _fallback_script(reason: str, hour: int, stability: str, name: str = "the resident") -> str:
     drift_note = " I've also noticed your routine has been a bit different the past few days." \
                  if stability == "regime_shift" else ""
+    named   = bool(name) and name != "the resident"
+    greet   = f"Hi {name}" if named else "Hi"
+    morning = f"Good morning {name}" if named else "Good morning"
     if "Bathroom" in reason and hour < 6:
-        return f"Hi Mary, I noticed you've been up quite a bit tonight. Feeling okay?{drift_note}"
+        return f"{greet}, I noticed you've been up quite a bit tonight. Feeling okay?{drift_note}"
     if "Kitchen" in reason and 6 <= hour <= 10:
-        return f"Good morning Mary, just checking in — looks like a slow start today. Everything alright?{drift_note}"
+        return f"{morning}, just checking in — looks like a slow start today. Everything alright?{drift_note}"
     if "FrontDoor" in reason:
-        return f"Hi Mary, I noticed the front door a moment ago. Just wanted to make sure everything is okay.{drift_note}"
-    return f"Hi Mary, just checking in on you.{drift_note}"
+        return f"{greet}, I noticed the front door a moment ago. Just wanted to make sure everything is okay.{drift_note}"
+    return f"{greet}, just checking in on you.{drift_note}"
 
 def _fallback_verdict(transcript: str) -> dict:
     if not transcript or transcript.strip() in ("", "…", "..."):
@@ -66,12 +69,12 @@ def _fallback_verdict(transcript: str) -> dict:
 def compose_checkin(reason: str, hour: int, memory: dict,
                     stability: str = "stable") -> dict:
     """Compose a personalised phone check-in script for the resident."""
+    name = memory.get("name", "the resident")
     if not _llm_available():
         log.warning("AZURE_OPENAI_KEY not set — using fallback check-in script.")
-        return {"script": _fallback_script(reason, hour, stability), "source": "fallback"}
+        return {"script": _fallback_script(reason, hour, stability, name), "source": "fallback"}
 
     brief = memory_brief(memory)
-    name  = memory.get("name", "the resident")
     time_desc = f"{hour:02d}:00"
 
     system = (
@@ -85,7 +88,8 @@ def compose_checkin(reason: str, hour: int, memory: dict,
         f"Resident profile:\n{brief}\n\n"
         f"Trigger: {reason} at {time_desc}.\n\n"
         "Write exactly ONE spoken sentence (≤40 words) that Vene would say when the resident picks up "
-        "the phone. Use their first name. Reference a personal detail if it feels natural. "
+        "the phone. Use their first name if one is given; otherwise keep it warm and general (e.g. 'Hi there'). "
+        "Reference a personal detail if it feels natural. "
         "Do not include any preamble, explanation, or quotation marks — just the sentence itself."
     )
 

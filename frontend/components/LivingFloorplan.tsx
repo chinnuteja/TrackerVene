@@ -2,21 +2,27 @@ import { motion } from "framer-motion";
 import { ROOM_POS, EDGES } from "@/lib/floorplan";
 import type { LocationState, AbsenceEvent } from "@/hooks/useRoutineFeed";
 
+type Layout = { pos: Record<string, { x: number; y: number }>; edges: [string, string][] };
+
 type Props = {
   currentRoom:     string | null;
   anomaly:         number | undefined;
   location?:       LocationState | null;
   currentAbsence?: AbsenceEvent | null;
+  blind?:          boolean;
+  layout?:         Layout;   // defaults to the CASAS home
 };
 
-export function LivingFloorplan({ currentRoom, anomaly, location, currentAbsence }: Props) {
+export function LivingFloorplan({ currentRoom, anomaly, location, currentAbsence, blind, layout }: Props) {
+  const ROOM_POS_ = layout?.pos   ?? ROOM_POS;
+  const EDGES_    = layout?.edges ?? EDGES;
   const heat       = Math.min((anomaly ?? 0) / 14, 1);
   const pulseColor = `hsl(${(1 - heat) * 150}, 80%, 55%)`;
 
   const inTransit   = !!currentAbsence;
   const fromRoom    = currentAbsence?.from_room ?? null;
   const displayRoom = inTransit ? fromRoom : currentRoom;
-  const pos         = (displayRoom && ROOM_POS[displayRoom]) ? ROOM_POS[displayRoom] : { x: 200, y: 200 };
+  const pos         = (displayRoom && ROOM_POS_[displayRoom]) ? ROOM_POS_[displayRoom] : { x: 200, y: 200 };
 
   const confidence  = location?.confidence ?? 1;
   const showBelief  = !inTransit && confidence < 0.8 && location != null;
@@ -24,18 +30,18 @@ export function LivingFloorplan({ currentRoom, anomaly, location, currentAbsence
   return (
     <svg viewBox="0 0 400 400" className="w-full h-full">
       {/* edges */}
-      {EDGES.map(([a, b], i) => {
-        if (!ROOM_POS[a] || !ROOM_POS[b]) return null;
+      {EDGES_.map(([a, b], i) => {
+        if (!ROOM_POS_[a] || !ROOM_POS_[b]) return null;
         return (
           <line key={i}
-            x1={ROOM_POS[a].x} y1={ROOM_POS[a].y}
-            x2={ROOM_POS[b].x} y2={ROOM_POS[b].y}
+            x1={ROOM_POS_[a].x} y1={ROOM_POS_[a].y}
+            x2={ROOM_POS_[b].x} y2={ROOM_POS_[b].y}
             stroke="var(--border)" strokeWidth={1.5} />
         );
       })}
 
       {/* room nodes */}
-      {Object.entries(ROOM_POS).map(([room, p]) => {
+      {Object.entries(ROOM_POS_).map(([room, p]) => {
         const isFrom   = inTransit && room === fromRoom;
         const beliefVal = showBelief ? (location?.belief?.[room] ?? 0) : 0;
         return (
@@ -96,6 +102,24 @@ export function LivingFloorplan({ currentRoom, anomaly, location, currentAbsence
           <text x={pos.x} y={pos.y + 46} textAnchor="middle"
             fontSize={8} fill="var(--alarm)" opacity={0.8}
           >in transit / unknown</text>
+        </>
+      )}
+
+      {/* BLIND: phone went dark — the map can't be trusted, and we say so loudly */}
+      {blind && (
+        <>
+          <rect x={0} y={0} width={400} height={400} fill="var(--bg)" opacity={0.62} />
+          <motion.text
+            x={200} y={192} textAnchor="middle" dominantBaseline="middle"
+            fontSize={20} fontWeight="bold" fontFamily="monospace" fill="var(--warn)"
+            animate={{ opacity: [1, 0.4, 1] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ⚠ SIGNAL LOST
+          </motion.text>
+          <text x={200} y={218} textAnchor="middle" fontSize={11} fontFamily="monospace" fill="var(--warn)">
+            phone went dark — this is NOT “all-clear”
+          </text>
         </>
       )}
 

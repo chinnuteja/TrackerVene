@@ -6,3 +6,47 @@
 {"ts": "2026-06-24T19:51:54.611595", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
 {"ts": "2026-06-24T19:55:00.221439", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "soft_checkin", "resolution": "worrying \u2014 escalated"}
 {"ts": "2026-06-24T19:55:03.735345", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-24T19:55:57.399840", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "soft_checkin", "resolution": "worrying \u2014 escalated"}
+{"ts": "2026-06-24T19:56:00.913067", "kind": "uti", "summary": "dwell_anomaly:Bathroom:2100s@bucket0", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-29T17:32:27.247519", "kind": "iphone_realday", "summary": "routine", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-29T17:32:38.529755", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-29T17:33:10.953857", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-29T17:46:39.605245", "kind": "iphone_realday", "summary": "routine", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-29T17:46:45.251201", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-29T17:47:04.036378", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-30T06:32:32.232931", "kind": "iphone_realday", "summary": "routine", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T06:32:37.880423", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T07:11:17.702364", "kind": "iphone_realday", "summary": "routine", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T07:11:31.348119", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T07:11:55.778385", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-30T07:17:58.503929", "kind": "iphone_realday", "summary": "routine", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T07:18:06.521176", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T07:18:35.311586", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-30T07:27:18.489358", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T07:27:26.511025", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T07:27:47.298329", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-30T15:36:55.400089", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T15:37:03.425948", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T15:37:24.262736", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-30T15:38:15.744744", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T15:38:23.787417", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T15:38:44.591336", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-06-30T16:12:05.327713", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-06-30T16:12:13.422084", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-06-30T16:12:34.332271", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-07-01T09:43:04.890297", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-07-01T09:43:12.905801", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-07-01T09:43:33.727738", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-07-01T15:47:00.378186", "kind": "calm", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-07-01T15:47:48.604725", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-07-01T15:47:56.713093", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-07-01T15:48:17.664245", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-07-01T15:50:08.502941", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-07-01T15:50:16.526878", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-07-01T15:50:37.342826", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-07-01T15:57:10.260223", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-07-01T15:57:18.334223", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-07-01T15:57:39.135346", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}
+{"ts": "2026-07-01T16:51:55.467257", "kind": "iphone_realday", "summary": "dwell_anomaly:Main Bedroom:1028s@bucket4", "action": "soft_checkin", "resolution": "no_answer \u2014 escalated"}
+{"ts": "2026-07-01T16:52:03.480990", "kind": "iphone_realday", "summary": "routine", "action": "escalate_caregiver", "resolution": "escalated to caregiver"}
+{"ts": "2026-07-01T16:52:24.272823", "kind": "observability", "summary": "sensor_offline \u2014 lost visibility", "action": "escalate_caregiver", "resolution": "blind \u2014 asked caregiver to check in person"}

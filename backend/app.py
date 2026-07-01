@@ -45,6 +45,7 @@ SCENARIO_FILES = {
     "wandering":           DATA_DIR / "casas_wandering.jsonl",
     "depressive":          DATA_DIR / "casas_depressive.jsonl",
     "hallway_fall":        DATA_DIR / "casas_hallway_fall.jsonl",
+    "iphone_realday":      DATA_DIR / "casas_iphone_realday.jsonl",
     "uti_multiday":        DATA_DIR / "casas_uti_multiday.jsonl",
     "wandering_multiday":  DATA_DIR / "casas_wandering_multiday.jsonl",
     "depressive_multiday": DATA_DIR / "casas_depressive_multiday.jsonl",
@@ -57,6 +58,7 @@ SCENARIO_REPLIES = {
     "wandering":       "",                                        # no answer
     "depressive":      "I don't know… I just don't feel like doing anything today.",
     "hallway_fall":    "",                                        # no answer → escalate
+    "iphone_realday":  "",                                        # no answer → escalate
     "uti_multiday":    "I keep needing the bathroom and my side is hurting a bit.",
     "wandering_multiday":  "",
     "depressive_multiday": "I don't know… I just don't feel like doing anything today.",
@@ -64,6 +66,7 @@ SCENARIO_REPLIES = {
 
 SPEED           = 600.0
 SPEED_MULTIDAY  = 1800.0   # faster replay for 3-day arcs (~4 min total)
+SPEED_IPHONE    = 8.0      # slow replay for the 10-event iPhone demo so beats breathe
 MAX_GAP         = 8.0
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -117,7 +120,13 @@ async def feed(ws: WebSocket):
 
     # ── load memory & brain ──────────────────────────────────────────────
     memory  = load_memory()
-    scorer  = Scorer("model.npz")
+    # iphone scenario is the candidate's OWN home — no "Mary", no borrowed profile/history
+    if scenario == "iphone_realday":
+        memory = {**memory, "name": "the resident", "prior_incidents": [],
+                  "personal_details": [], "baseline_summary": "", "age": ""}
+    # iphone scenario uses a model of the resident's OWN home, not Mary's CASAS model
+    model_file = "model_iphone.npz" if scenario == "iphone_realday" else "model.npz"
+    scorer  = Scorer(model_file)
     cpd     = BayesianChangepoint(hazard_rate=1 / 200)
     agent   = Agent(memory=memory)
 
@@ -170,7 +179,9 @@ async def feed(ws: WebSocket):
         receive_task = asyncio.create_task(_receive_loop())
 
     # ── main replay loop ───────────────────────────────────────────────────
-    speed = SPEED_MULTIDAY if scenario.endswith("_multiday") else SPEED
+    speed = (SPEED_MULTIDAY if scenario.endswith("_multiday")
+             else SPEED_IPHONE if scenario == "iphone_realday"
+             else SPEED)
     location_belief   = LocationBelief(scorer.rooms, scorer.P)
 
     prev              = events[0]["epoch"]
@@ -184,6 +195,31 @@ async def feed(ws: WebSocket):
 
     try:
         for e in events:
+            # ── observability: the phone went dark — silence is NOT 'all clear' ──
+            if e.get("kind") == "sensor_offline":
+                await asyncio.sleep(min((e["epoch"] - prev) / speed, MAX_GAP))
+                await ws.send_json({
+                    "type":         "blind",
+                    "from_room":    scorer.prev_room or e.get("room"),
+                    "last_seen_ts": prev_ts_iso,
+                    "msg":          "Signal lost — the phone went dark. We can no longer see "
+                                    "movement, so this is NOT 'all clear'.",
+                })
+                incident = {
+                    "ts":         datetime.utcnow().isoformat(),
+                    "kind":       "observability",
+                    "summary":    "sensor_offline — lost visibility",
+                    "action":     "escalate_caregiver",
+                    "resolution": "blind — asked caregiver to check in person",
+                }
+                add_incident(memory, incident)
+                _append_incident(incident)
+                await ws.send_json({"type": "incident", "incident": incident})
+                await ws.send_json({"type": "memory",
+                                    "brief": memory_brief(memory),
+                                    "incidents": memory.get("prior_incidents", [])})
+                break
+
             gap   = e["epoch"] - prev
             delay = min(gap / speed, MAX_GAP)
 
@@ -229,6 +265,10 @@ async def feed(ws: WebSocket):
 
             score    = scorer.score(e)
             cp_state = cpd.update(score["surprisal"])
+            # cold-start: a few days of data can't justify a "regime shift" claim — stay
+            # conservative so only an unambiguous signal (the absence boost) fires a check-in.
+            if scenario == "iphone_realday":
+                cp_state = {**cp_state, "stability": "stable"}
             decision = agent.decide(score, cp_state, e)
 
             await ws.send_json({

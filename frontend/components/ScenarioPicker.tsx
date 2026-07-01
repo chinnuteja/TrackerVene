@@ -7,6 +7,7 @@ const SCENARIOS: { id: Scenario; label: string; desc: string; multi?: boolean; h
   { id: "wandering",          label: "Wandering",    desc: "3am front-door egress" },
   { id: "depressive",         label: "Low mood",     desc: "No morning kitchen routine" },
   { id: "hallway_fall",       label: "Hallway fall", desc: "Fall between rooms — no sensor needed", hero: true },
+  { id: "iphone_realday",     label: "My apartment · iPhone", desc: "Real iPhone data — no sensors, no wearable", hero: true },
   { id: "uti_multiday",       label: "UTI ×3d",      desc: "3-day ramping UTI arc",     multi: true },
   { id: "wandering_multiday", label: "Wander ×3d",   desc: "3-day wandering arc",       multi: true },
   { id: "depressive_multiday",label: "Low ×3d",      desc: "3-day low mood arc",        multi: true },

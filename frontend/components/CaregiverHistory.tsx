@@ -1,13 +1,23 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/hooks/useRoutineFeed";
+import { plainReason } from "@/lib/explain";
 
 const KIND_CONFIG: Record<string, { label: string; color: string }> = {
-  uti:        { label: "UTI / bathroom", color: "var(--alarm)" },
-  wandering:  { label: "Night wandering", color: "var(--alarm)" },
-  depressive: { label: "Low mood",        color: "var(--warn)"  },
-  calm:       { label: "Routine",          color: "var(--calm)"  },
+  uti:            { label: "UTI / bathroom",  color: "var(--alarm)" },
+  wandering:      { label: "Night wandering", color: "var(--alarm)" },
+  depressive:     { label: "Low mood",        color: "var(--warn)"  },
+  calm:           { label: "Routine",         color: "var(--calm)"  },
+  iphone_realday: { label: "Absence alert",   color: "var(--alarm)" },
+  observability:  { label: "Visibility lost", color: "var(--warn)"  },
 };
+
+// raw reason tags → plain English; leave already-readable summaries alone
+function readable(summary: string): string {
+  return /^(rare_transition:|dwell_anomaly:)/.test(summary) || summary === "routine"
+    ? plainReason(summary)
+    : summary;
+}
 
 function fmtTime(ts: string) {
   try {
@@ -23,9 +33,9 @@ function fmtDate(ts: string) {
   } catch { return ts.slice(0, 10); }
 }
 
-type Props = { incidents: Incident[] };
+type Props = { incidents: Incident[]; subtitle?: string };
 
-export function CaregiverHistory({ incidents }: Props) {
+export function CaregiverHistory({ incidents, subtitle }: Props) {
   return (
     <div
       className="rounded-xl border p-4 flex flex-col"
@@ -35,7 +45,7 @@ export function CaregiverHistory({ incidents }: Props) {
         CAREGIVER HISTORY
       </span>
       <p className="text-[10px] text-[var(--muted)] mb-3">
-        Incidents Sarah would see — each one saved to Mary&apos;s profile.
+        {subtitle ?? "Incidents Sarah would see — each one saved to Mary’s profile."}
       </p>
 
       {incidents.length === 0 && (
@@ -82,7 +92,7 @@ export function CaregiverHistory({ incidents }: Props) {
                     </span>
                   </div>
                   <p className="text-[11px] text-[var(--muted)] leading-snug">
-                    {inc.summary}
+                    {readable(inc.summary)}
                   </p>
                   <p className="text-[11px] leading-snug mt-0.5" style={{ color: cfg.color }}>
                     {inc.resolution}

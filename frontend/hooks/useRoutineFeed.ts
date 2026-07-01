@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export type Scenario = "calm" | "uti" | "wandering" | "depressive" | "hallway_fall"
+                     | "iphone_realday"
                      | "uti_multiday" | "wandering_multiday" | "depressive_multiday";
 export type Mode      = "auto" | "interactive";
 export type CallPhase = "idle" | "composing" | "ringing" | "calling" | "listening" | "interpreting" | "resolved";
@@ -73,6 +74,12 @@ export type AbsenceEvent = {
   severity:        "high";
 };
 
+export type BlindEvent = {
+  from_room:    string;
+  last_seen_ts: string;
+  msg:          string;
+};
+
 export type FeedMsg = {
   type:        string;
   event?:      { room: string; ts: string; value: string };
@@ -123,6 +130,8 @@ export function useRoutineFeed() {
   const [callPhase,      setCallPhase]      = useState<CallPhase>("idle");
   const [location,       setLocation]       = useState<LocationState | null>(null);
   const [currentAbsence, setCurrentAbsence] = useState<AbsenceEvent | null>(null);
+  const [blind,          setBlind]          = useState<BlindEvent | null>(null);
+  const [live,           setLive]           = useState<{ action: string; reason: string } | null>(null);
 
   // reset all feed state when scenario/mode changes
   const resetFeed = useCallback(() => {
@@ -136,6 +145,8 @@ export function useRoutineFeed() {
     setIsDone(false);
     setLocation(null);
     setCurrentAbsence(null);
+    setBlind(null);
+    setLive(null);
     // keep memory + incidents — they're persistent across runs
   }, []);
 
@@ -172,8 +183,9 @@ export function useRoutineFeed() {
           ]);
         }
         if (cp) setChangepoint(cp);
-        if (dec && dec.action !== "observe") {
-          setDecisions(d => [dec, ...d].slice(0, 8));
+        if (dec) {
+          setLive({ action: dec.action, reason: dec.trigger });
+          if (dec.action !== "observe") setDecisions(d => [dec, ...d].slice(0, 8));
         }
         if (loc) setLocation(loc);
         break;
@@ -181,6 +193,11 @@ export function useRoutineFeed() {
 
       case "absence":
         setCurrentAbsence(m as unknown as AbsenceEvent);
+        break;
+
+      case "blind":
+        setBlind(m as unknown as BlindEvent);
+        setCurrentAbsence(null);
         break;
 
       case "call":
@@ -248,8 +265,8 @@ export function useRoutineFeed() {
     currentProbe, lastResolution, callPhase,
     // memory
     memory, incidents,
-    // location + absence
-    location, currentAbsence,
+    // location + absence + observability
+    location, currentAbsence, blind, live,
     // control
     scenario, setScenario, mode, setMode,
     answer,

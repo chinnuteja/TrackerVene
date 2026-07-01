@@ -45,7 +45,7 @@ export function IntroOverlay({ onDismiss }: Props) {
           <p className="text-sm text-[var(--muted)] leading-relaxed mb-6">
             This system learns the personal rhythm of a resident's day — the shape of an ordinary
             morning — and detects when that shape starts to bend. When it does, it doesn't alarm
-            the family. It calls Mary first.
+            the family. It reaches out to the resident first, and only escalates if needed.
           </p>
 
           {/* three pillars */}
@@ -69,10 +69,23 @@ export function IntroOverlay({ onDismiss }: Props) {
 
           {/* demo tip */}
           <p className="text-[11px] text-[var(--muted)] mb-6 leading-snug">
-            Select <span className="text-[var(--text)] font-semibold">CALM</span> to see a normal day, then switch to{" "}
-            <span className="text-[var(--alarm)] font-semibold">ANOMALY → UTI</span> to watch the arc:
-            anomaly builds → Vene calls Mary → her reply is interpreted → stand-down or escalation.
+            This build runs on a <span className="text-[var(--text)] font-semibold">real iPhone recording</span> of a home —
+            no wall sensors, no wearable. Hit start and watch: the routine plays, then a fall is caught by the{" "}
+            <span className="text-[var(--alarm)] font-semibold">silence</span> where movement should be, then the phone
+            goes dark — which it refuses to read as “all-clear.”
           </p>
+
+          {/* orientation — the last thing they read before clicking */}
+          <div
+            className="rounded-lg border px-3 py-2 mb-4"
+            style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--accent) 6%, transparent)" }}
+          >
+            <p className="text-[11px] leading-relaxed text-[var(--muted)]">
+              <span className="font-semibold text-[var(--text)]">Compressed replay — not live.</span>{" "}
+              ~11 min of real iPhone movement, played fast so you see the whole flow. The absence/fall
+              and phone-off moments are staged to show the response.
+            </p>
+          </div>
 
           <button
             onClick={onDismiss}
